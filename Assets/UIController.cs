@@ -27,10 +27,9 @@ public class UIController : MonoBehaviour {
 
 		StartCoroutine( APIManager.instance.SetState(newState, res => 
 			{
-				if(res)
-				{
-					connected = res;
-				}	
+				// 現在の状態を更新			
+				connected = res;
+				buttonLabel.text = connected ? "ON" : "OFF";
 		}) );
 	}
 

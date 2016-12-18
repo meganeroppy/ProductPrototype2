@@ -8,7 +8,10 @@ public class UIController : MonoBehaviour {
 
 	public Text buttonLabel;
 
+	public Text statusLabel;
+
 	private bool connected;
+	private bool waiting = false;
 
 	// Use this for initialization
 	void Start () 
@@ -17,10 +20,20 @@ public class UIController : MonoBehaviour {
 		StartCoroutine( APIManager.instance.GetState( res =>
 		{
 				connected = res;
+				waiting = false;
 		}));
+		waiting = true;
+	}
+		
+	void Update()
+	{
+		button.gameObject.SetActive( !waiting );
+		statusLabel.text = "ステータス : " + ( waiting ? "応答待ち中" : "入力受付中" );
 	}
 
-
+	/// <summary>
+	/// ボタンが押された時のイベント
+	/// </summary>
 	public void PressConnectButton()
 	{
 		bool newState = !connected;
@@ -30,7 +43,9 @@ public class UIController : MonoBehaviour {
 				// 現在の状態を更新			
 				connected = res;
 				buttonLabel.text = connected ? "ON" : "OFF";
+				waiting = false;
 		}) );
+		waiting = true;
 	}
 
 }

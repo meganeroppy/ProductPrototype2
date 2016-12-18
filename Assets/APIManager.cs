@@ -17,7 +17,8 @@ public class APIManager : MonoBehaviour {
 	/// <param name="callback">Callback.</param>
 	public IEnumerator GetState(System.Action<bool> callback )
 	{
-		yield return 1;
+		// 応答を待つ
+		yield return new WaitForSeconds(3);
 
 		callback(false);
 	}
@@ -30,6 +31,9 @@ public class APIManager : MonoBehaviour {
 	/// <param name="callback">Callback.</param>
 	public IEnumerator SetState( bool value, System.Action<bool> callback )
 	{
-		yield return 1;
+		// 応答を待つ
+		yield return new WaitForSeconds(3);
+
 		callback(value);
-	}}
+	}
+}

@@ -11,24 +11,42 @@ public class UIController : MonoBehaviour {
 	public Text statusLabel;
 
 	private bool connected;
-	private bool waiting = false;
+	private int waitCnt = 0;
 
 	// Use this for initialization
 	void Start () 
 	{
-		// 現在の状態を取得
-		StartCoroutine( APIManager.instance.GetState( res =>
+		StartCoroutine( LoopGetState() );
+	}
+
+	private IEnumerator LoopGetState()
+	{
+		var interval = 1f;
+		var timer = 0f;
+		while(true)
 		{
-				connected = res;
-				waiting = false;
-		}));
-		waiting = true;
+			timer = 0;
+
+			// 現在の状態を取得
+			yield return StartCoroutine( APIManager.instance.GetState( res =>
+				{
+					connected = res.Equals("1");
+			}));
+
+			while( timer < interval )
+			{
+				timer += Time.deltaTime;
+				yield return null;
+			}
+		}
+
 	}
 		
 	void Update()
 	{
-		button.gameObject.SetActive( !waiting );
-		statusLabel.text = "ステータス : " + ( waiting ? "応答待ち中" : "入力受付中" );
+		button.gameObject.SetActive( waitCnt <= 0 );
+		statusLabel.text = "ステータス : " + ( waitCnt > 0 ? "応答待ち中" : "入力受付中" );
+		buttonLabel.text = connected ? "ON" : "OFF";
 	}
 
 	/// <summary>
@@ -36,16 +54,15 @@ public class UIController : MonoBehaviour {
 	/// </summary>
 	public void PressConnectButton()
 	{
-		bool newState = !connected;
+		bool bNewState = !connected;
 
-		StartCoroutine( APIManager.instance.SetState(newState, res => 
+		waitCnt++;
+		StartCoroutine( APIManager.instance.SetState(bNewState ? "1" : "0", res => 
 			{
 				// 現在の状態を更新			
-				connected = res;
-				buttonLabel.text = connected ? "ON" : "OFF";
-				waiting = false;
+				connected = res.Equals("1");
+				waitCnt--;
 		}) );
-		waiting = true;
 	}
 
 }

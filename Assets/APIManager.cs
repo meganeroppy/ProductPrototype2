@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using LitJson;
 
 public class APIManager : MonoBehaviour {
 
@@ -15,12 +16,18 @@ public class APIManager : MonoBehaviour {
 	/// </summary>
 	/// <returns>The state.</returns>
 	/// <param name="callback">Callback.</param>
-	public IEnumerator GetState(System.Action<bool> callback )
+	public IEnumerator GetState(System.Action<string> callback )
 	{
-		// 応答を待つ
-		yield return new WaitForSeconds(3);
+		var url = "http://172.17.193.156:8000/GPIO/25/value";
 
-		callback(false);
+		var www = new WWW(url);
+
+		// 応答を待つ
+		yield return www;
+
+		Debug.Log("GetState" + www.text);
+
+		callback(www.text);
 	}
 
 	/// <summary>
@@ -29,11 +36,24 @@ public class APIManager : MonoBehaviour {
 	/// <returns>The state.</returns>
 	/// <param name="value">If set to <c>true</c> value.</param>
 	/// <param name="callback">Callback.</param>
-	public IEnumerator SetState( bool value, System.Action<bool> callback )
+	public IEnumerator SetState( string value, System.Action<string> callback )
 	{
-		// 応答を待つ
-		yield return new WaitForSeconds(3);
+		
+		// POSTだけどURLにパラメータまで含める？
+		var url = "http://172.17.193.156:8000/GPIO/25/value/" + value;
 
-		callback(value);
+		// 送信開始
+
+		// 何かセットしないとGET扱いになってエラーになる
+		var form = new WWWForm();
+		form.AddField("value", "1");
+		var www = new WWW(url, form);
+
+		// 応答を待つ
+		yield return www;
+
+		Debug.Log( "SetState" + www.text);
+
+		callback(www.text);
 	}
 }
